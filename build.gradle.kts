@@ -30,7 +30,9 @@ dependencies {
     testImplementation("io.grpc:grpc-testing:${grpcVersion}")
     compileOnly("org.apache.tomcat:annotations-api:6.0.53")
     compileOnly("org.jetbrains:annotations:16.0.2")
-    compile("com.rabbitmq", "amqp-client", "5.7.0")
+    implementation("com.rabbitmq", "amqp-client", "5.7.0")
+    implementation("org.slf4j", "slf4j-api", "1.7.30")
+    implementation("org.slf4j", "slf4j-simple", "1.7.30")
     testCompile("junit", "junit", "4.12")
 }
 
