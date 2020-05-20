@@ -19,7 +19,7 @@ object Recv {
         channel.queueDeclare(QUEUE_NAME, false, false, false, null)
         println(" [*] Waiting for messages. To exit press CTRL+C")
         val deliverCallback = DeliverCallback { consumerTag: String?, delivery: Delivery ->
-            val message = String(delivery.body, "UTF-8")
+            val message = String(delivery.body)
             println(" [x] Received '$message'")
         }
         channel.basicConsume(QUEUE_NAME, true, deliverCallback, CancelCallback { consumerTag: String? -> })
