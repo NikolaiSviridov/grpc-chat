@@ -1,24 +1,15 @@
 package com.firsttimeinforever.chat
 
 fun main(args: Array<String>) {
+
     when (args.size) {
         2 -> {
-            val port = Integer.parseInt(args.first())
-            val userName = args[1]
-            val server = Server(ServerProperties(port))
+            val recv = Recv(args[0])
             Thread(Runnable {
-                server.start()
+                recv.start()
             }).start()
-            val client = ChatClient(ClientProperties(ClientConnectionProperties(port, "localhost"), userName))
-            client.start()
-            server.stop()
-        }
-        3 -> {
-            val hostname = args.first()
-            val port = Integer.parseInt(args[1])
-            val userName = args[2]
-            val client = ChatClient(ClientProperties(ClientConnectionProperties(port, hostname), userName))
-            client.start()
+            val sender = Send(args[0], args[1])
+            sender.start()
         }
         else -> {
             println("Bad arguments")
