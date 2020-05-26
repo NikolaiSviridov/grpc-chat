@@ -25,6 +25,7 @@ class ChatClient(private var UserName: String) {
                     "c" -> addChannel(values[1])
                     "w" -> send(UserName, values[1], values.subList(2, values.size).joinToString(separator = " "))
                     "dc" -> deleteChannel(values[1])
+                    "cc" -> createChannel(values[1])
                     else -> println("Smth wrong")
                 }
             }
@@ -75,5 +76,14 @@ class ChatClient(private var UserName: String) {
         hashRecv.get(channelName)?.stop()
         hashRecv.remove(channelName)
         println("Left '$channelName'")
+    }
+
+    private fun createChannel(channelName : String) {
+        val factory = ConnectionFactory()
+        factory.host = "localhost"
+        val connection = factory.newConnection()
+        val channel = connection.createChannel()
+        channel.exchangeDeclare(channelName, "fanout")
+        println("Created channel '$channelName'")
     }
 }
