@@ -1,31 +1,12 @@
 package com.firsttimeinforever.chat
 
-import com.firsttimeinforever.chat.ChatServiceOuterClass.ChatMessage
-import io.grpc.ManagedChannelBuilder
-import io.grpc.stub.StreamObserver
+import com.rabbitmq.client.ConnectionFactory
+import java.nio.charset.StandardCharsets
 import java.util.*
+import kotlin.collections.HashMap
 
-class ChatClient(private val properties: ClientProperties) {
-    private val channel = ManagedChannelBuilder.forAddress(properties.connection.hostname, properties.connection.port).usePlaintext().build()
-    private val chatService = ChatServiceGrpc.newStub(channel);
-    private val chat = chatService.chat(object: StreamObserver<ChatMessageFromServer?> {
-        override fun onNext(receivedMessage: ChatMessageFromServer?) {
-            if (receivedMessage == null) {
-                return
-            }
-            println("${Date(receivedMessage.timestamp.seconds)}: ${receivedMessage.message.from} wrote: ${receivedMessage.message.text}")
-        }
-
-        override fun onError(t: Throwable) {
-            t.printStackTrace()
-            println("Disconnected")
-        }
-
-        override fun onCompleted() {
-            println("Disconnected")
-        }
-    })
-
+class ChatClient(private var UserName: String) {
+    private val hashRecv: HashMap<String, Recv> = HashMap()
     fun start() {
         println("Ready for messages")
         val input = Scanner(System.`in`)
@@ -34,12 +15,65 @@ class ChatClient(private val properties: ClientProperties) {
             if (line.isBlank()) {
                 continue
             }
+
+            val values = line.split(" ")
+            if (values.size > 1) {
+                val cmd = values[0]
+
+                when (cmd) {
+                    "user" -> UserName = values[1]
+                    "c" -> addChannel(values[1])
+                    "w" -> send(UserName, values[1], values.subList(2, values.size).joinToString(separator = " "))
+                    "dc" -> deleteChannel(values[1])
+                    else -> println("Smth wrong")
+                }
+            }
+
             if (line == "exit") {
-                chat.onCompleted()
-                channel.shutdown()
                 break
             }
-            chat.onNext(ChatMessage.newBuilder().setFrom(properties.userName).setText(line).build())
         }
+    }
+    private fun addChannel(channelName : String ) {
+        if (hashRecv.containsKey(channelName)) {
+            println("already go channel '$channelName'")
+            return
+        }
+
+        val recv = Recv(channelName)
+        recv.start()
+        hashRecv.put(channelName, recv)
+        println("Connected to '$channelName'")
+    }
+
+    private fun send(user:String, channelName:String, msg:String) {
+        if (!hashRecv.containsKey(channelName)) {
+            println("Doesn't have channel '$channelName'")
+            return
+        }
+
+        val factory = ConnectionFactory()
+        factory.host = "localhost"
+        factory.newConnection().use { connection ->
+            connection.createChannel().use { channel ->
+                channel.basicPublish(
+                    channelName,
+                    "",
+                    null,
+                    ("Channel $channelName| $user: $msg").toByteArray(StandardCharsets.UTF_8)
+                )
+            }
+        }
+    }
+
+    private fun deleteChannel(channelName : String) {
+        if (!hashRecv.containsKey(channelName)) {
+            println("Doesn't have channel '$channelName'")
+            return
+        }
+
+        hashRecv.get(channelName)?.stop()
+        hashRecv.remove(channelName)
+        println("Left '$channelName'")
     }
 }

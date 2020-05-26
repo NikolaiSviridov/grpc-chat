@@ -1,29 +1,28 @@
 package com.firsttimeinforever.chat
 
-import com.rabbitmq.client.CancelCallback
-import com.rabbitmq.client.ConnectionFactory
-import com.rabbitmq.client.DeliverCallback
-import com.rabbitmq.client.Delivery
+import com.rabbitmq.client.*
 
 
-class Recv(private val EXCHANGE: String) {
+class Recv(private val exchange: String) {
 
+    var QUEUE_NAME: String? = null
+    var channel: Channel? = null
     fun start() {
         val factory = ConnectionFactory()
         factory.host = "localhost"
         val connection = factory.newConnection()
-        val channel = connection.createChannel()
-        channel.exchangeDeclare(EXCHANGE, "fanout")
-        val QUEUE_NAME = channel.queueDeclare().queue
-        channel.queueBind(QUEUE_NAME, EXCHANGE, "")
-//    println(" [*] Waiting for messages. To exit press CTRL+C")
+        channel = connection.createChannel()
+        QUEUE_NAME = channel?.queueDeclare()?.queue
+        channel?.queueBind(QUEUE_NAME, exchange, "")
         val deliverCallback = DeliverCallback { consumerTag: String?, delivery: Delivery ->
             val message = String(delivery.body)
             println(" [x] '$message'")
         }
-        channel.basicConsume(QUEUE_NAME, true, deliverCallback, CancelCallback { consumerTag: String? -> })
-
+        channel?.basicConsume(QUEUE_NAME, true, deliverCallback, CancelCallback { consumerTag: String? -> })
 
     }
 
+    fun stop() {
+        channel?.abort()
+    }
 }

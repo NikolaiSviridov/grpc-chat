@@ -1,7 +1,6 @@
 package com.firsttimeinforever.chat
 
 import com.rabbitmq.client.ConnectionFactory
-import com.rabbitmq.client.MessageProperties
 import java.nio.charset.StandardCharsets
 import java.util.*
 
@@ -15,13 +14,14 @@ class Send(
         factory.host = "localhost"
         val input = Scanner(System.`in`)
         while (input.hasNextLine()) {
-            val message = input.nextLine()
-
+            val line = input.nextLine()
+            val values = line.split(" ")
+            val exchange = values[0]
+            val message = values[1]
             factory.newConnection().use { connection ->
                 connection.createChannel().use { channel ->
-                    channel.exchangeDeclare(EXCHANGE, "fanout")
                     channel.basicPublish(
-                        EXCHANGE,
+                        exchange,
                         "",
                         null,
                         ("$USER: $message").toByteArray(StandardCharsets.UTF_8)
