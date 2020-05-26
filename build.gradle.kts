@@ -34,6 +34,7 @@ dependencies {
     implementation("org.slf4j", "slf4j-api", "1.7.30")
     implementation("org.slf4j", "slf4j-simple", "1.7.30")
     testCompile("junit", "junit", "4.12")
+    compileOnly("org.springframework.integration:spring-integration-core:4.2.1.RELEASE")
 }
 
 configure<JavaPluginConvention> {
