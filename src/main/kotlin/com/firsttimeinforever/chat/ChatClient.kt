@@ -1,11 +1,10 @@
 package com.firsttimeinforever.chat
 
 import com.rabbitmq.client.ConnectionFactory
-import java.awt.BorderLayout
-import java.awt.GridLayout
+import java.awt.*
 import java.nio.charset.StandardCharsets
 import javax.swing.*
-import kotlin.collections.HashMap
+
 
 class ChatClient(private var UserName: String) : JFrame() {
     private val hashRecv: HashMap<String, Recv> = HashMap()
@@ -27,9 +26,12 @@ class ChatClient(private var UserName: String) : JFrame() {
         setTitle(title)
 
         val panelChannel = JPanel()
-        panelChannel.add(channelLine)
-        panelChannel.add(connectToChannelButton)
-        panelChannel.layout = GridLayout()
+        val label = JLabel(UserName)
+        label.setSize(20, 50)
+        panelChannel.add(label, 0,0)
+        panelChannel.add(channelLine,1,0)
+        panelChannel.add(connectToChannelButton,1,1)
+        panelChannel.layout = GridLayout(2,2)
         add(panelChannel, BorderLayout.NORTH)
 
         val panelMsg = JPanel()
