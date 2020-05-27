@@ -17,7 +17,7 @@ class ChatClient(private var UserName: String) : JFrame() {
 
     init {
         layout = BorderLayout()
-        createUI("gucci Chat")
+        createUI("$UserName Chat")
         connectButtons()
     }
 
@@ -43,7 +43,7 @@ class ChatClient(private var UserName: String) : JFrame() {
         add(tabbedPane, BorderLayout.CENTER)
 
         defaultCloseOperation = JFrame.EXIT_ON_CLOSE
-        setSize(600, 400)
+        setSize(600, 300)
         setLocationRelativeTo(null)
     }
 
@@ -52,7 +52,7 @@ class ChatClient(private var UserName: String) : JFrame() {
             val value = channelLine.text
             val area = JTextArea()
             area.isEditable = false
-            area.font = area.font.deriveFont(16)
+            area.font = area.font.deriveFont(18f)
             textChannel.put(value, area)
             tabbedPane.add("$value", area)
             addChannel(value)
